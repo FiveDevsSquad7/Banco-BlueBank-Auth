@@ -1,4 +1,4 @@
-package com.banco.bluebank.auth;
+package com.banco.bluebank.auth.core;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
