@@ -13,18 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.inMemoryAuthentication()
-			.withUser("carlos")
-				.password(passwordEncoder().encode("123"))
-				.roles("ADMIN")
-			.and()
-			.withUser("pedro")
-				.password(passwordEncoder().encode("123"))
-				.roles("USER");
-	}
-	
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();

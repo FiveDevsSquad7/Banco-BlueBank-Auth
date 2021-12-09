@@ -1,7 +1,6 @@
 package com.banco.bluebank.auth.domain;
 
 import com.banco.bluebank.auth.core.DigitoVerificadorLuhn;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -26,20 +25,13 @@ public class Conta implements Serializable {
 	@PostLoad
 	public void configurarUsuario(){
 		var dv = new DigitoVerificadorLuhn();
-		usuario = String.format("%d%s", numeroConta, dv.calculaDigitoVerificador(numeroConta.toString()))
-
+		usuario = String.format("%d%s", numeroConta, dv.calculaDigitoVerificador(numeroConta.toString()));
+		System.out.println("Conta carregada: "+usuario);
 	}
 
 	public Conta() {
 	}
 
-	public String getUsuario() {
-		return usuario;
-	}
-
-	public void setUsuario(String usuario) {
-		this.usuario = usuario;
-	}
 
 	public Conta(Long numeroConta, String senha) {
 		this.numeroConta = numeroConta;
@@ -60,6 +52,14 @@ public class Conta implements Serializable {
 
 	public void setSenha(String senha) {
 		this.senha = senha;
+	}
+
+	public String getUsuario() {
+		return usuario;
+	}
+
+	public void setUsuario(String usuario) {
+		this.usuario = usuario;
 	}
 
 	@Override
