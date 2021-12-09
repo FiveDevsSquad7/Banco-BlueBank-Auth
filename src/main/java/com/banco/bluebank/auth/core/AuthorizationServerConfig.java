@@ -20,6 +20,9 @@ import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFacto
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
+    @Value("${bluebank.authorizationpassword}")
+    private String authorizationPassword;
+
     @Value("${bluebank.keystorepassword}")
     private String keystorePassword;
 
@@ -37,7 +40,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
         clients.inMemory()
                 .withClient("bluebank-app")
-                    .secret(passwordEncoder.encode("web123"))
+                    .secret(passwordEncoder.encode(authorizationPassword))
                     .authorizedGrantTypes("password")
                     .scopes("READ", "WRITE")
                     .accessTokenValiditySeconds(60*60*12)
