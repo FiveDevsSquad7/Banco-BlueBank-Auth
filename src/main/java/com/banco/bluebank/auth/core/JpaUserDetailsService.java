@@ -26,8 +26,6 @@ public class JpaUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        System.out.println("username: "+username);
-
         if(username.length()<2){
             throw new UsernameNotFoundException("Número de conta inválida");
         } else if(!dv.verificaDigitoVerificador(username)) {
@@ -36,7 +34,6 @@ public class JpaUserDetailsService implements UserDetailsService {
             username = username.substring(0, username.length() - 1 );
         }
 
-        System.out.println("username: "+username);
         Conta conta = contaRepository.findById(Long.parseLong(username))
                 .orElseThrow(() -> new UsernameNotFoundException("Conta não encontrada"));
 

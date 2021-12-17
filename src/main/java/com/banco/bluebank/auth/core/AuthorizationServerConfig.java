@@ -1,11 +1,16 @@
 package com.banco.bluebank.auth.core;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -16,15 +21,18 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 
+import java.security.KeyPair;
+import java.security.interfaces.RSAPublicKey;
+
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
+    @Autowired
+    private JwtKeyStoreProperties jwtKeyStoreProperties;
+
     @Value("${bluebank.authorizationpassword}")
     private String authorizationPassword;
-
-    @Value("${bluebank.keystorepassword}")
-    private String keystorePassword;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -49,6 +57,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                     .secret(passwordEncoder.encode("check978"));
     }
 
+
+
+
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 //        security.checkTokenAccess("isAuthenticated()");
@@ -56,20 +67,35 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .tokenKeyAccess("permitAll()");
     }
 
+
+    @Bean
+    public JWKSet jwkSet() {
+        RSAKey.Builder builder = new RSAKey.Builder((RSAPublicKey) keyPair().getPublic())
+                .keyUse(KeyUse.SIGNATURE)
+                .algorithm(JWSAlgorithm.RS256)
+                .keyID("bluebank-key-id");
+
+        return new JWKSet(builder.build());
+    }
+
     @Bean
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
         var jwtAccessTokenConverter = new JwtAccessTokenConverter();
-//        jwtAccessTokenConverter.setSigningKey("fjalsdjflsdafj34534lkjdfoaj23450923450j03ffjvvjfj");
 
-        var jksResource = new ClassPathResource("keystores/bluebank.jks");
-        var keyStorePass = keystorePassword;
-        var keyPairAlias = "bluebank";
-        var keyStoreKeyFactory = new KeyStoreKeyFactory(jksResource, keyStorePass.toCharArray());
-        var keyPair = keyStoreKeyFactory.getKeyPair(keyPairAlias);
-
-        jwtAccessTokenConverter.setKeyPair(keyPair);
+        jwtAccessTokenConverter.setKeyPair(keyPair());
 
         return jwtAccessTokenConverter;
+    }
+
+    private KeyPair keyPair() {
+
+        var keyStorePass = jwtKeyStoreProperties.getPassword();
+        var keyPairAlias = jwtKeyStoreProperties.getKeypairAlias();
+        var keyStoreKeyFactory = new KeyStoreKeyFactory(
+                jwtKeyStoreProperties.getJksLocation(), keyStorePass.toCharArray());
+
+        return keyStoreKeyFactory.getKeyPair(keyPairAlias);
+
     }
 
     @Override
