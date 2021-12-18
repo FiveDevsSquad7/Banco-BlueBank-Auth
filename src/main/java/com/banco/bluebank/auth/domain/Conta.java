@@ -26,7 +26,6 @@ public class Conta implements Serializable {
 	public void configurarUsuario(){
 		var dv = new DigitoVerificadorLuhn();
 		usuario = String.format("%d%s", numeroConta, dv.calculaDigitoVerificador(numeroConta.toString()));
-		System.out.println("Conta carregada: "+usuario);
 	}
 
 	public Conta() {
